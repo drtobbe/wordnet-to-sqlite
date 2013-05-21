@@ -1,0 +1,457 @@
+<html><head><meta http-equiv="content-type" content="text/html; charset=utf-8"> <style>
+	.KEYW {color: #933;}
+	.COMM {color: #bbb; font-style: italic;}
+	.NUMB {color: #393;}
+	.STRN {color: #393;}
+	.REGX {color: #339;}
+	.line {border-right: 1px dotted #666; color: #666; font-style: normal;}
+	</style></head><body><pre><span class='line'>  1</span> <span class="COMM">/*jslint
+<span class='line'>  2</span>     white: true,
+<span class='line'>  3</span>     node: true,
+<span class='line'>  4</span>     stupid: true,
+<span class='line'>  5</span>     nomen: true,
+<span class='line'>  6</span>     vars: true,
+<span class='line'>  7</span>     regexp: true
+<span class='line'>  8</span> */</span><span class="WHIT">
+<span class='line'>  9</span> 
+<span class='line'> 10</span> </span><span class="COMM">/**
+<span class='line'> 11</span>  * @fileOverview A utility for parsing the WordNet files into an sqlite database using Node.js
+<span class='line'> 12</span>  * @author &lt;a href="mailto:matthewkastor@gmail.com">Matthew Kastor&lt;/a>
+<span class='line'> 13</span>  * @version 0.0.1
+<span class='line'> 14</span>  * @requires fs
+<span class='line'> 15</span>  * @requires WNdb
+<span class='line'> 16</span>  * @requires sqlite3
+<span class='line'> 17</span>  * @exports nothing yet
+<span class='line'> 18</span>  */</span><span class="WHIT">
+<span class='line'> 19</span> 
+<span class='line'> 20</span> </span><span class="COMM">/**
+<span class='line'> 21</span>  * This regular expression tests for and separates the `word` from it's 
+<span class='line'> 22</span>  *  syntactic marker.
+<span class='line'> 23</span>  * 
+<span class='line'> 24</span>  * The following notes are from wninput(5WN) at
+<span class='line'> 25</span>  * http://wordnet.princeton.edu/man/wninput.5WN.html
+<span class='line'> 26</span>  * 
+<span class='line'> 27</span>  * ASCII form of a word as entered in the synset by the lexicographer, with 
+<span class='line'> 28</span>  * spaces replaced by underscore characters (_). The text of the word is 
+<span class='line'> 29</span>  * case sensitive, in contrast to its form in the corresponding index. pos 
+<span class='line'> 30</span>  * file, that contains only lower-case forms. In data.adj , a word is 
+<span class='line'> 31</span>  * followed by a syntactic marker if one was specified in the lexicographer 
+<span class='line'> 32</span>  * file. A syntactic marker is appended, in parentheses, onto word without 
+<span class='line'> 33</span>  * any intervening spaces. See wninput(5WN) for a list of the syntactic 
+<span class='line'> 34</span>  * markers for adjectives.
+<span class='line'> 35</span>  * 
+<span class='line'> 36</span>  * The syntactic markers are:
+<span class='line'> 37</span>  * 
+<span class='line'> 38</span>  * (p)    predicate position
+<span class='line'> 39</span>  * (a)    prenominal (attributive) position
+<span class='line'> 40</span>  * (ip)   immediately postnominal position
+<span class='line'> 41</span>  * 
+<span class='line'> 42</span>  * @author &lt;a href="mailto:matthewkastor@gmail.com">Matthew Kastor&lt;/a>
+<span class='line'> 43</span>  * @version 20130521
+<span class='line'> 44</span>  */</span><span class="WHIT">
+<span class='line'> 45</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">syntactic_markers</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="REGX">/(.*)\((..?)\)/</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 46</span> </span><span class="COMM">/**
+<span class='line'> 47</span>  * This regular expression separates the source and target identifiers.
+<span class='line'> 48</span>  * this pattern returns ["0a3b", "0a", "3b"]
+<span class='line'> 49</span>  * for "0a3b".match(source_target);
+<span class='line'> 50</span>  * 
+<span class='line'> 51</span>  * The following notes are from
+<span class='line'> 52</span>  * http://wordnet.princeton.edu/man/wninput.5WN.html
+<span class='line'> 53</span>  * 
+<span class='line'> 54</span>  * The source/target field distinguishes lexical and semantic pointers. It 
+<span class='line'> 55</span>  * is a four byte field, containing two two-digit hexadecimal integers. The 
+<span class='line'> 56</span>  * first two digits indicates the word number in the current (source) 
+<span class='line'> 57</span>  * synset, the last two digits indicate the word number in the target 
+<span class='line'> 58</span>  * synset. A value of 0000 means that pointer_symbol represents a semantic 
+<span class='line'> 59</span>  * relation between the current (source) synset and the target synset 
+<span class='line'> 60</span>  * indicated by synset_offset.
+<span class='line'> 61</span>  * 
+<span class='line'> 62</span>  * @author &lt;a href="mailto:matthewkastor@gmail.com">Matthew Kastor&lt;/a>
+<span class='line'> 63</span>  * @version 20130521
+<span class='line'> 64</span>  */</span><span class="WHIT">
+<span class='line'> 65</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">source_target</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="REGX">/([0-9a-f]{2})([0-9a-f]{2})/</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'> 66</span> </span><span class="COMM">/**
+<span class='line'> 67</span>  * Parses the `data.` file's individual records.
+<span class='line'> 68</span>  * @author &lt;a href="mailto:matthewkastor@gmail.com">Matthew Kastor&lt;/a>
+<span class='line'> 69</span>  * @version 20130521
+<span class='line'> 70</span>  * @param {String} record A line of information from the `data.` file.
+<span class='line'> 71</span>  * @returns {Object} Returns an object containing properties whose values are 
+<span class='line'> 72</span>  *  determined by the parsed data.
+<span class='line'> 73</span>  * @example
+<span class='line'> 74</span>  * // This is example output
+<span class='line'> 75</span>  * 
+<span class='line'> 76</span>  * { gloss: 'without musical accompaniment; "they performed a cappella"',
+<span class='line'> 77</span>  *   synset_offset: '00001740',
+<span class='line'> 78</span>  *   lex_filenum: '02',
+<span class='line'> 79</span>  *   ss_type: 'r',
+<span class='line'> 80</span>  *   w_cnt: '01',
+<span class='line'> 81</span>  *   words: [ { word: 'a_cappella', syntactic_markers: '', lex_id: '0' } ],
+<span class='line'> 82</span>  *   p_cnt: '000',
+<span class='line'> 83</span>  *   pointers: [],
+<span class='line'> 84</span>  *   f_cnt: 0,
+<span class='line'> 85</span>  *   frames: [] }
+<span class='line'> 86</span>  *
+<span class='line'> 87</span>  * @example
+<span class='line'> 88</span>  * // This is example output
+<span class='line'> 89</span>  * 
+<span class='line'> 90</span>  * { gloss: 'draw air into, and expel out of, the lungs; "I can breathe 
+<span class='line'> 91</span>  *  better when the air is clean"; "The patient is respiring"',
+<span class='line'> 92</span>  *   synset_offset: '00001740',
+<span class='line'> 93</span>  *   lex_filenum: '29',
+<span class='line'> 94</span>  *   ss_type: 'v',
+<span class='line'> 95</span>  *   w_cnt: '04',
+<span class='line'> 96</span>  *   words: 
+<span class='line'> 97</span>  *    [ { word: 'breathe', syntactic_markers: '', lex_id: '0' },
+<span class='line'> 98</span>  *      { word: 'take_a_breath', syntactic_markers: '', lex_id: '0' },
+<span class='line'> 99</span>  *      { word: 'respire', syntactic_markers: '', lex_id: '0' },
+<span class='line'>100</span>  *      { word: 'suspire', syntactic_markers: '', lex_id: '3' } ],
+<span class='line'>101</span>  *   p_cnt: '021',
+<span class='line'>102</span>  *   pointers: 
+<span class='line'>103</span>  *    [ { pointer_symbol: '*',
+<span class='line'>104</span>  *        synset_offset: '00005041',
+<span class='line'>105</span>  *        ss_type: 'v',
+<span class='line'>106</span>  *        source_target: '0000',
+<span class='line'>107</span>  *        source: '00',
+<span class='line'>108</span>  *        target: '00' },
+<span class='line'>109</span>  *      { pointer_symbol: '*',
+<span class='line'>110</span>  *        synset_offset: '00004227',
+<span class='line'>111</span>  *        ss_type: 'v',
+<span class='line'>112</span>  *        source_target: '0000',
+<span class='line'>113</span>  *        source: '00',
+<span class='line'>114</span>  *        target: '00' },
+<span class='line'>115</span>  *      { pointer_symbol: '+',
+<span class='line'>116</span>  *        synset_offset: '03110322',
+<span class='line'>117</span>  *        ss_type: 'a',
+<span class='line'>118</span>  *        source_target: '0301',
+<span class='line'>119</span>  *        source: '03',
+<span class='line'>120</span>  *        target: '01' },
+<span class='line'>121</span>  *      { pointer_symbol: '+',
+<span class='line'>122</span>  *        synset_offset: '00831191',
+<span class='line'>123</span>  *        ss_type: 'n',
+<span class='line'>124</span>  *        source_target: '0303',
+<span class='line'>125</span>  *        source: '03',
+<span class='line'>126</span>  *        target: '03' },
+<span class='line'>127</span>  *      { pointer_symbol: '+',
+<span class='line'>128</span>  *        synset_offset: '04080833',
+<span class='line'>129</span>  *        ss_type: 'n',
+<span class='line'>130</span>  *        source_target: '0301',
+<span class='line'>131</span>  *        source: '03',
+<span class='line'>132</span>  *        target: '01' },
+<span class='line'>133</span>  *      { pointer_symbol: '+',
+<span class='line'>134</span>  *        synset_offset: '04250850',
+<span class='line'>135</span>  *        ss_type: 'n',
+<span class='line'>136</span>  *        source_target: '0105',
+<span class='line'>137</span>  *        source: '01',
+<span class='line'>138</span>  *        target: '05' },
+<span class='line'>139</span>  *      { pointer_symbol: '+',
+<span class='line'>140</span>  *        synset_offset: '00831191',
+<span class='line'>141</span>  *        ss_type: 'n',
+<span class='line'>142</span>  *        source_target: '0101',
+<span class='line'>143</span>  *        source: '01',
+<span class='line'>144</span>  *        target: '01' },
+<span class='line'>145</span>  *      { pointer_symbol: '^',
+<span class='line'>146</span>  *        synset_offset: '00004227',
+<span class='line'>147</span>  *        ss_type: 'v',
+<span class='line'>148</span>  *        source_target: '0103',
+<span class='line'>149</span>  *        source: '01',
+<span class='line'>150</span>  *        target: '03' },
+<span class='line'>151</span>  *      { pointer_symbol: '^',
+<span class='line'>152</span>  *        synset_offset: '00005041',
+<span class='line'>153</span>  *        ss_type: 'v',
+<span class='line'>154</span>  *        source_target: '0103',
+<span class='line'>155</span>  *        source: '01',
+<span class='line'>156</span>  *        target: '03' },
+<span class='line'>157</span>  *      { pointer_symbol: '$',
+<span class='line'>158</span>  *        synset_offset: '00002325',
+<span class='line'>159</span>  *        ss_type: 'v',
+<span class='line'>160</span>  *        source_target: '0000',
+<span class='line'>161</span>  *        source: '00',
+<span class='line'>162</span>  *        target: '00' },
+<span class='line'>163</span>  *      { pointer_symbol: '$',
+<span class='line'>164</span>  *        synset_offset: '00002573',
+<span class='line'>165</span>  *        ss_type: 'v',
+<span class='line'>166</span>  *        source_target: '0000',
+<span class='line'>167</span>  *        source: '00',
+<span class='line'>168</span>  *        target: '00' },
+<span class='line'>169</span>  *      { pointer_symbol: '~',
+<span class='line'>170</span>  *        synset_offset: '00002573',
+<span class='line'>171</span>  *        ss_type: 'v',
+<span class='line'>172</span>  *        source_target: '0000',
+<span class='line'>173</span>  *        source: '00',
+<span class='line'>174</span>  *        target: '00' },
+<span class='line'>175</span>  *      { pointer_symbol: '~',
+<span class='line'>176</span>  *        synset_offset: '00002724',
+<span class='line'>177</span>  *        ss_type: 'v',
+<span class='line'>178</span>  *        source_target: '0000',
+<span class='line'>179</span>  *        source: '00',
+<span class='line'>180</span>  *        target: '00' },
+<span class='line'>181</span>  *      { pointer_symbol: '~',
+<span class='line'>182</span>  *        synset_offset: '00002942',
+<span class='line'>183</span>  *        ss_type: 'v',
+<span class='line'>184</span>  *        source_target: '0000',
+<span class='line'>185</span>  *        source: '00',
+<span class='line'>186</span>  *        target: '00' },
+<span class='line'>187</span>  *      { pointer_symbol: '~',
+<span class='line'>188</span>  *        synset_offset: '00003826',
+<span class='line'>189</span>  *        ss_type: 'v',
+<span class='line'>190</span>  *        source_target: '0000',
+<span class='line'>191</span>  *        source: '00',
+<span class='line'>192</span>  *        target: '00' },
+<span class='line'>193</span>  *      { pointer_symbol: '~',
+<span class='line'>194</span>  *        synset_offset: '00004032',
+<span class='line'>195</span>  *        ss_type: 'v',
+<span class='line'>196</span>  *        source_target: '0000',
+<span class='line'>197</span>  *        source: '00',
+<span class='line'>198</span>  *        target: '00' },
+<span class='line'>199</span>  *      { pointer_symbol: '~',
+<span class='line'>200</span>  *        synset_offset: '00004227',
+<span class='line'>201</span>  *        ss_type: 'v',
+<span class='line'>202</span>  *        source_target: '0000',
+<span class='line'>203</span>  *        source: '00',
+<span class='line'>204</span>  *        target: '00' },
+<span class='line'>205</span>  *      { pointer_symbol: '~',
+<span class='line'>206</span>  *        synset_offset: '00005041',
+<span class='line'>207</span>  *        ss_type: 'v',
+<span class='line'>208</span>  *        source_target: '0000',
+<span class='line'>209</span>  *        source: '00',
+<span class='line'>210</span>  *        target: '00' },
+<span class='line'>211</span>  *      { pointer_symbol: '~',
+<span class='line'>212</span>  *        synset_offset: '00006697',
+<span class='line'>213</span>  *        ss_type: 'v',
+<span class='line'>214</span>  *        source_target: '0000',
+<span class='line'>215</span>  *        source: '00',
+<span class='line'>216</span>  *        target: '00' },
+<span class='line'>217</span>  *      { pointer_symbol: '~',
+<span class='line'>218</span>  *        synset_offset: '00007328',
+<span class='line'>219</span>  *        ss_type: 'v',
+<span class='line'>220</span>  *        source_target: '0000',
+<span class='line'>221</span>  *        source: '00',
+<span class='line'>222</span>  *        target: '00' },
+<span class='line'>223</span>  *      { pointer_symbol: '~',
+<span class='line'>224</span>  *        synset_offset: '00017031',
+<span class='line'>225</span>  *        ss_type: 'v',
+<span class='line'>226</span>  *        source_target: '0000',
+<span class='line'>227</span>  *        source: '00',
+<span class='line'>228</span>  *        target: '00' } ],
+<span class='line'>229</span>  *   f_cnt: '02',
+<span class='line'>230</span>  *   frames: [ { f_num: '02', w_num: '00' }, { f_num: '08', w_num: '00' } ] }
+<span class='line'>231</span>  * 
+<span class='line'>232</span>  * @example
+<span class='line'>233</span>  * // This is example output
+<span class='line'>234</span>  * 
+<span class='line'>235</span>  * { gloss: '(usually followed by `to\') having the necessary means or 
+<span class='line'>236</span>  *  skill or know-how or authority to do something; "able to swim"; 
+<span class='line'>237</span>  *  "she was able to program her computer"; "we were at last able to 
+<span class='line'>238</span>  *  buy a car"; "able to get a grant for the project"',
+<span class='line'>239</span>  *   synset_offset: '00001740',
+<span class='line'>240</span>  *   lex_filenum: '00',
+<span class='line'>241</span>  *   ss_type: 'a',
+<span class='line'>242</span>  *   w_cnt: '01',
+<span class='line'>243</span>  *   words: [ { word: 'able', syntactic_markers: '', lex_id: '0' } ],
+<span class='line'>244</span>  *   p_cnt: '005',
+<span class='line'>245</span>  *   pointers: 
+<span class='line'>246</span>  *    [ { pointer_symbol: '=',
+<span class='line'>247</span>  *        synset_offset: '05200169',
+<span class='line'>248</span>  *        ss_type: 'n',
+<span class='line'>249</span>  *        source_target: '0000',
+<span class='line'>250</span>  *        source: '00',
+<span class='line'>251</span>  *        target: '00' },
+<span class='line'>252</span>  *      { pointer_symbol: '=',
+<span class='line'>253</span>  *        synset_offset: '05616246',
+<span class='line'>254</span>  *        ss_type: 'n',
+<span class='line'>255</span>  *        source_target: '0000',
+<span class='line'>256</span>  *        source: '00',
+<span class='line'>257</span>  *        target: '00' },
+<span class='line'>258</span>  *      { pointer_symbol: '+',
+<span class='line'>259</span>  *        synset_offset: '05616246',
+<span class='line'>260</span>  *        ss_type: 'n',
+<span class='line'>261</span>  *        source_target: '0101',
+<span class='line'>262</span>  *        source: '01',
+<span class='line'>263</span>  *        target: '01' },
+<span class='line'>264</span>  *      { pointer_symbol: '+',
+<span class='line'>265</span>  *        synset_offset: '05200169',
+<span class='line'>266</span>  *        ss_type: 'n',
+<span class='line'>267</span>  *        source_target: '0101',
+<span class='line'>268</span>  *        source: '01',
+<span class='line'>269</span>  *        target: '01' },
+<span class='line'>270</span>  *      { pointer_symbol: '!',
+<span class='line'>271</span>  *        synset_offset: '00002098',
+<span class='line'>272</span>  *        ss_type: 'a',
+<span class='line'>273</span>  *        source_target: '0101',
+<span class='line'>274</span>  *        source: '01',
+<span class='line'>275</span>  *        target: '01' } ],
+<span class='line'>276</span>  *   f_cnt: 0,
+<span class='line'>277</span>  *   frames: [] }
+<span class='line'>278</span>  * 
+<span class='line'>279</span>  * @example
+<span class='line'>280</span>  * // This is example output
+<span class='line'>281</span>  * 
+<span class='line'>282</span>  * { gloss: 'that which is perceived or known or inferred to have its 
+<span class='line'>283</span>  *  own distinct existence (living or nonliving)',
+<span class='line'>284</span>  *   synset_offset: '00001740',
+<span class='line'>285</span>  *   lex_filenum: '03',
+<span class='line'>286</span>  *   ss_type: 'n',
+<span class='line'>287</span>  *   w_cnt: '01',
+<span class='line'>288</span>  *   words: [ { word: 'entity', syntactic_markers: '', lex_id: '0' } ],
+<span class='line'>289</span>  *   p_cnt: '003',
+<span class='line'>290</span>  *   pointers: 
+<span class='line'>291</span>  *    [ { pointer_symbol: '~',
+<span class='line'>292</span>  *        synset_offset: '00001930',
+<span class='line'>293</span>  *        ss_type: 'n',
+<span class='line'>294</span>  *        source_target: '0000',
+<span class='line'>295</span>  *        source: '00',
+<span class='line'>296</span>  *        target: '00' },
+<span class='line'>297</span>  *      { pointer_symbol: '~',
+<span class='line'>298</span>  *        synset_offset: '00002137',
+<span class='line'>299</span>  *        ss_type: 'n',
+<span class='line'>300</span>  *        source_target: '0000',
+<span class='line'>301</span>  *        source: '00',
+<span class='line'>302</span>  *        target: '00' },
+<span class='line'>303</span>  *      { pointer_symbol: '~',
+<span class='line'>304</span>  *        synset_offset: '04424418',
+<span class='line'>305</span>  *        ss_type: 'n',
+<span class='line'>306</span>  *        source_target: '0000',
+<span class='line'>307</span>  *        source: '00',
+<span class='line'>308</span>  *        target: '00' } ],
+<span class='line'>309</span>  *   f_cnt: 0,
+<span class='line'>310</span>  *   frames: [] }
+<span class='line'>311</span>  * 
+<span class='line'>312</span>  */</span><span class="WHIT">
+<span class='line'>313</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">parseDataFileFormat</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">record</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>314</span> </span><span class="WHIT">    </span><span class="STRN">'use strict'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>315</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">out</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>316</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">tmp</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">record.split</span><span class="PUNC">(</span><span class="STRN">'|'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>317</span> </span><span class="WHIT">    </span><span class="NAME">out.gloss</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">trim</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>318</span> </span><span class="WHIT">    </span><span class="NAME">tmp</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">.</span><span class="NAME">trim</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">split</span><span class="PUNC">(</span><span class="STRN">' '</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>319</span> </span><span class="WHIT">    </span><span class="NAME">out.synset_offset</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>320</span> </span><span class="WHIT">    </span><span class="NAME">out.lex_filenum</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>321</span> </span><span class="WHIT">    </span><span class="NAME">out.ss_type</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>322</span> </span><span class="WHIT">    </span><span class="NAME">out.w_cnt</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>323</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">numWords</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parseInt</span><span class="PUNC">(</span><span class="NAME">out.w_cnt</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">16</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>324</span> </span><span class="WHIT">    </span><span class="NAME">out.words</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>325</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">wrd</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>326</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">synMark</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>327</span> </span><span class="WHIT">    </span><span class="KEYW">while</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">numWords</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>328</span> </span><span class="WHIT">        </span><span class="NAME">wrd</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>329</span> </span><span class="WHIT">        </span><span class="NAME">synMark</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>330</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">syntactic_markers.test</span><span class="PUNC">(</span><span class="NAME">wrd</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>331</span> </span><span class="WHIT">            </span><span class="NAME">synMark</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">wrd.match</span><span class="PUNC">(</span><span class="NAME">syntactic_markers</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>332</span> </span><span class="WHIT">            </span><span class="NAME">wrd</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">wrd.match</span><span class="PUNC">(</span><span class="NAME">syntactic_markers</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>333</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>334</span> </span><span class="WHIT">        </span><span class="NAME">out.words.push</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>335</span> </span><span class="WHIT">            </span><span class="STRN">"word"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">wrd</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>336</span> </span><span class="WHIT">            </span><span class="STRN">"syntactic_markers"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">synMark</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>337</span> </span><span class="WHIT">            </span><span class="STRN">"lex_id"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>338</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>339</span> </span><span class="WHIT">        </span><span class="NAME">numWords</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>340</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>341</span> </span><span class="WHIT">    </span><span class="NAME">out.p_cnt</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>342</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">numPtr</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parseInt</span><span class="PUNC">(</span><span class="NAME">out.p_cnt</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">10</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>343</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">drawer</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>344</span> </span><span class="WHIT">    </span><span class="NAME">out.pointers</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>345</span> </span><span class="WHIT">    </span><span class="KEYW">while</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">numPtr</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>346</span> </span><span class="WHIT">        </span><span class="NAME">drawer</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>347</span> </span><span class="WHIT">            </span><span class="STRN">"pointer_symbol"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>348</span> </span><span class="WHIT">            </span><span class="STRN">"synset_offset"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>349</span> </span><span class="WHIT">            </span><span class="STRN">"ss_type"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>350</span> </span><span class="WHIT">            </span><span class="STRN">"source_target"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>351</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>352</span> </span><span class="WHIT">        </span><span class="NAME">drawer.source</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">drawer.source_target.match</span><span class="PUNC">(</span><span class="NAME">source_target</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">1</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>353</span> </span><span class="WHIT">        </span><span class="NAME">drawer.target</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">drawer.source_target.match</span><span class="PUNC">(</span><span class="NAME">source_target</span><span class="PUNC">)</span><span class="PUNC">[</span><span class="NUMB">2</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>354</span> </span><span class="WHIT">        </span><span class="NAME">out.pointers.push</span><span class="PUNC">(</span><span class="NAME">drawer</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>355</span> </span><span class="WHIT">        </span><span class="NAME">numPtr</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>356</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>357</span> </span><span class="WHIT">    </span><span class="NAME">out.f_cnt</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>358</span> </span><span class="WHIT">    </span><span class="NAME">out.frames</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">[</span><span class="PUNC">]</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>359</span> </span><span class="WHIT">    </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">tmp.length</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>360</span> </span><span class="WHIT">        </span><span class="NAME">out.f_cnt</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>361</span> </span><span class="WHIT">        </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">numFrames</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">parseInt</span><span class="PUNC">(</span><span class="NAME">out.f_cnt</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NUMB">10</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>362</span> </span><span class="WHIT">        </span><span class="KEYW">while</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">numFrames</span><span class="WHIT"> </span><span class="PUNC">></span><span class="WHIT"> </span><span class="NUMB">0</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>363</span> </span><span class="WHIT">            </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="COMM">// throw away superfluous + sign, there's a count.</span><span class="WHIT">
+<span class='line'>364</span> </span><span class="WHIT">            </span><span class="NAME">out.frames.push</span><span class="PUNC">(</span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>365</span> </span><span class="WHIT">                </span><span class="STRN">"f_num"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="WHIT">
+<span class='line'>366</span> </span><span class="WHIT">                </span><span class="STRN">"w_num"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">tmp.shift</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>367</span> </span><span class="WHIT">            </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>368</span> </span><span class="WHIT">            </span><span class="NAME">numFrames</span><span class="WHIT"> </span><span class="PUNC">-</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">1</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>369</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>370</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>371</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">out</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>372</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>373</span> </span><span class="COMM">/**
+<span class='line'>374</span>  * Converts `data.` files into an array.
+<span class='line'>375</span>  * @author &lt;a href="mailto:matthewkastor@gmail.com">Matthew Kastor&lt;/a>
+<span class='line'>376</span>  * @version 20130521
+<span class='line'>377</span>  * @param {String} fileContents The contents of the file to parse.
+<span class='line'>378</span>  * @returns {Object} Returns an object with two properties: license and entries.
+<span class='line'>379</span>  *  The license property contains the license header from the file. The entries
+<span class='line'>380</span>  *  property contains the array of parsed information.
+<span class='line'>381</span>  * @example
+<span class='line'>382</span>  * var wordnet = require('WNdb');
+<span class='line'>383</span>  * var path = require('path');
+<span class='line'>384</span>  * var fs = require('fs');
+<span class='line'>385</span>  * 
+<span class='line'>386</span>  * wordnet.files.forEach(function (filename) {
+<span class='line'>387</span>  *     'use strict';
+<span class='line'>388</span>  *     var fname = path.resolve(wordnet.path, filename);
+<span class='line'>389</span>  *     
+<span class='line'>390</span>  *     fs.readFile(fname, 'utf8', function (err, contents) {
+<span class='line'>391</span>  *         if (err) {
+<span class='line'>392</span>  *             throw err;
+<span class='line'>393</span>  *         }
+<span class='line'>394</span>  *         if (/data/.test(filename)) {
+<span class='line'>395</span>  *             console.log(
+<span class='line'>396</span>  *                 // let's not get carried away here. we'll look at the first
+<span class='line'>397</span>  *                 // entry parsed from each file.
+<span class='line'>398</span>  *                 wordNetDataFileToArray(contents).entries[0]
+<span class='line'>399</span>  *             );
+<span class='line'>400</span>  *         }
+<span class='line'>401</span>  *     });
+<span class='line'>402</span>  * });
+<span class='line'>403</span>  * // see the example for `parseDataFileFormat` and imagine those massive 
+<span class='line'>404</span>  * // objects in an array... 
+<span class='line'>405</span>  * @see parseDataFileFormat
+<span class='line'>406</span>  */</span><span class="WHIT">
+<span class='line'>407</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">wordNetDataFileToArray</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">fileContents</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>408</span> </span><span class="WHIT">    </span><span class="STRN">'use strict'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>409</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">comments</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="REGX">/^ {2}.*$/gm</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>410</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">out</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>411</span> </span><span class="WHIT">        </span><span class="STRN">"license"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">fileContents.match</span><span class="PUNC">(</span><span class="NAME">comments</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">join</span><span class="PUNC">(</span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="PUNC">,</span><span class="WHIT">
+<span class='line'>412</span> </span><span class="WHIT">        </span><span class="STRN">"entries"</span><span class="WHIT"> </span><span class="PUNC">:</span><span class="WHIT"> </span><span class="NAME">fileContents.replace</span><span class="PUNC">(</span><span class="NAME">comments</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">''</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>413</span> </span><span class="WHIT">            </span><span class="PUNC">.</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/(\r\n|\r|\n)+/g</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>414</span> </span><span class="WHIT">            </span><span class="PUNC">.</span><span class="NAME">trim</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>415</span> </span><span class="WHIT">            </span><span class="PUNC">.</span><span class="NAME">split</span><span class="PUNC">(</span><span class="STRN">'\n'</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>416</span> </span><span class="WHIT">            </span><span class="PUNC">.</span><span class="NAME">map</span><span class="PUNC">(</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">entry</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>417</span> </span><span class="WHIT">                </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">parseDataFileFormat</span><span class="PUNC">(</span><span class="NAME">entry</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>418</span> </span><span class="WHIT">            </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'>419</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>420</span> </span><span class="WHIT">    </span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">out</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>421</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>422</span> 
+<span class='line'>423</span> 
+<span class='line'>424</span> 
+<span class='line'>425</span> 
+<span class='line'>426</span> </span><span class="COMM">// ############# converts `data.` files into an array but does not work on </span><span class="WHIT">
+<span class='line'>427</span> </span><span class="COMM">// `index.` files yet.</span><span class="WHIT">
+<span class='line'>428</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">wordnet</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">require</span><span class="PUNC">(</span><span class="STRN">'WNdb'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>429</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">path</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">require</span><span class="PUNC">(</span><span class="STRN">'path'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>430</span> </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">fs</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">require</span><span class="PUNC">(</span><span class="STRN">'fs'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>431</span> 
+<span class='line'>432</span> </span><span class="NAME">wordnet.files.forEach</span><span class="PUNC">(</span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">filename</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>433</span> </span><span class="WHIT">    </span><span class="STRN">'use strict'</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>434</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">fname</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">path.resolve</span><span class="PUNC">(</span><span class="NAME">wordnet.path</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">filename</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>435</span> </span><span class="WHIT">    </span><span class="WHIT">
+<span class='line'>436</span> </span><span class="WHIT">    </span><span class="NAME">fs.readFile</span><span class="PUNC">(</span><span class="NAME">fname</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="STRN">'utf8'</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">err</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">contents</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>437</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">err</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>438</span> </span><span class="WHIT">            </span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="NAME">err</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>439</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>440</span> </span><span class="WHIT">        </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="REGX">/data/</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="NAME">filename</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>441</span> </span><span class="WHIT">            </span><span class="NAME">console.log</span><span class="PUNC">(</span><span class="WHIT">
+<span class='line'>442</span> </span><span class="WHIT">                </span><span class="NAME">wordNetDataFileToArray</span><span class="PUNC">(</span><span class="NAME">contents</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="NAME">entries</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="WHIT">
+<span class='line'>443</span> </span><span class="WHIT">            </span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>444</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>445</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>446</span> </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>447</span> 
+<span class='line'>448</span> 
+<span class='line'>449</span> 
+<span class='line'>450</span> </span></pre></body></html>

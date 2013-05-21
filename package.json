@@ -1,0 +1,26 @@
+{
+                    
+    "name"          : "wordnet-to-sqlite",
+    "version"       : "0.0.1",
+    "main"          : "./src/wordnet-to-sqlite.js",
+    "description"   : "A utility for parsing the wordnet files into an sqlite database using Node.js.",
+    "keywords"      : ["wordnet", "nlp", "language", "linguistics", "atropa"],
+    "homepage"      : "https://github.com/matthewkastor/wordnet-to-sqlite/",
+    "bugs"          : "https://github.com/matthewkastor/wordnet-to-sqlite/issues",
+    "author"        : {
+                        "name"      : "Matthew Kastor",
+                        "email"     : "matthewkastor@gmail.com",
+                        "url"       : "https://plus.google.com/100898583798552211130"
+    },
+    "repository"    : {
+                        "type"      : "git",
+                        "url"       : "git://github.com/matthewkastor/wordnet-to-sqlite.git"
+    },
+    "engines"       : {
+                        "node"      : ">=0.8.14"
+    },
+    "dependencies"  : {
+                        "sqlite3" : ">=2.1.7",
+                        "WNdb"    : ">=3.0.1"
+    }
+}
