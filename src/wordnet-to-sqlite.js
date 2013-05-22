@@ -611,12 +611,8 @@ function wordnetToArrays (wnDirectory, callback) {
  *  generated arrays along with the parsed file's name.
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
- * @param {String} wnDirectory The directory containing the wordnet database 
- *  files.
- * @param {Function} callback A callback function which will be given each 
- *  array as it is generated.
  */
-function wordnetToSqliteDb (callback) {
+function wordnetToSqliteDb () {
     var wordnet = require('WNdb');
     wordnetToArrays(wordnet.path, function (filename, arr) {
         console.log(filename + ' =', arr.entries[0]); 
