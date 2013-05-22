@@ -14,8 +14,7 @@
  * @requires fs
  * @requires WNdb
  * @requires sqlite3
- * @exports parseDataFileFormat
- * @exports wordNetDataFileToArray
+ * @exports wordnetToArrays
  * @exports wordnetToSqliteDb
  */
 
@@ -40,19 +39,19 @@
  * (p)    predicate position
  * (a)    prenominal (attributive) position
  * (ip)   immediately postnominal position
- * 
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
+ * @private
  */
 var syntactic_markers = /(.*)\((..?)\)/;
 /**
  * This regular expression separates the source and target identifiers.
  * this pattern returns ["0a3b", "0a", "3b"]
  * for "0a3b".match(source_target);
- * 
+ *  
  * The following notes are from
  * http://wordnet.princeton.edu/man/wninput.5WN.html
- * 
+ *  
  * The source/target field distinguishes lexical and semantic pointers. It 
  * is a four byte field, containing two two-digit hexadecimal integers. The 
  * first two digits indicates the word number in the current (source) 
@@ -60,11 +59,21 @@ var syntactic_markers = /(.*)\((..?)\)/;
  * synset. A value of 0000 means that pointer_symbol represents a semantic 
  * relation between the current (source) synset and the target synset 
  * indicated by synset_offset.
- * 
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
+ * @private
  */
 var source_target = /([0-9a-f]{2})([0-9a-f]{2})/;
+/**
+ * Separates the license from the given fileContents and feeds the remaining 
+ *  lines into the given entry parser.
+ * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
+ * @version 20130521
+ * @private
+ * @param {String} fileContents The file contents to parse.
+ * @param {Function} entryParser The entry parser to use.
+ * @returns {Object} Returns an object representing the parsed file.
+ */
 function wordNetFileToArray (fileContents, entryParser) {
     'use strict';
     var comments = /^ {2}.*$/gm;
@@ -90,10 +99,11 @@ function wordNetFileToArray (fileContents, entryParser) {
     return out;
 }
 /**
- * Parses the `data.` file's individual records.
+ * Parses the `data` file's individual records.
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
- * @param {String} record A line of information from the `data.` file.
+ * @private
+ * @param {String} record A line of information from the `data` file.
  * @returns {Object} Returns an object containing properties whose values are 
  *  determined by the parsed data.
  * @example
@@ -397,10 +407,11 @@ function parseDataFileFormat (record) {
     return out;
 }
 /**
- * Parses the `index.` file's individual records.
+ * Parses the `index` file's individual records.
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
- * @param {String} record A line of information from the `index.` file.
+ * @private
+ * @param {String} record A line of information from the `index` file.
  * @returns {Object} Returns an object containing properties whose values are 
  *  determined by the parsed data.
  * @example
@@ -478,9 +489,10 @@ function parseIndexFileFormat (record) {
     return out;
 }
 /**
- * Converts `data.` files into an array.
+ * Converts `data` files into an array.
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
+ * @private
  * @param {String} fileContents The contents of the file to parse.
  * @returns {Object} Returns an object with two properties: license and entries.
  *  The license property contains the license header from the file. The entries
@@ -516,9 +528,10 @@ function wordNetDataFileToArray (fileContents) {
     return wordNetFileToArray(fileContents, parseDataFileFormat);
 }
 /**
- * Converts `index.` files into an array.
+ * Converts `index` files into an array.
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
+ * @private
  * @param {String} fileContents The contents of the file to parse.
  * @returns {Object} Returns an object with two properties: license and entries.
  *  The license property contains the license header from the file. The entries
@@ -554,13 +567,17 @@ function wordNetIndexFileToArray (fileContents) {
     return wordNetFileToArray(fileContents, parseIndexFileFormat);
 }
 /**
- * ############# converts `data.` files into an array but does not work on 
- *  `index.` files yet.
+ * Converts `data` and `index` files into arrays.
+ * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
+ * @version 20130521
+ * @param {String} wnDirectory The directory containing the wordnet database 
+ *  files.
+ * @param {Function} callback A callback function which will be given each 
+ *  array as it is generated.
  */
-function wordnetToSqliteDb () {
-    var wordnet = require('WNdb');
-    var path = require('path');
+function wordnetToArrays (wnDirectory, callback) {
     var fs = require('fs');
+    var path = require('path');
     var wordNetDatabaseFiles = [
         "index.noun",
         "data.noun",
@@ -573,24 +590,34 @@ function wordnetToSqliteDb () {
     ];
     wordNetDatabaseFiles.forEach(function (filename) {
         'use strict';
-        var fname = path.resolve(wordnet.path, filename);
+        var fname = path.resolve(wnDirectory, filename);
         
         fs.readFile(fname, 'utf8', function (err, contents) {
             if (err) {
                 throw err;
             }
             if (/data/.test(filename)) {
-                //console.log(wordNetDataFileToArray(contents).entries[0]);
+                callback(wordNetDataFileToArray(contents));
             }
             if (/index/.test(filename)) {
-                console.log(
-                    wordNetIndexFileToArray(contents).entries[14]
-                );
+                callback(wordNetIndexFileToArray(contents));
             }
         });
     });
 }
+/**
+ * Converts `data` and `index` files into an SQLite database.
+ * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
+ * @version 20130521
+ * @param {String} wnDirectory The directory containing the wordnet database 
+ *  files.
+ * @param {Function} callback A callback function which will be given each 
+ *  array as it is generated.
+ */
+function wordnetToSqliteDb (callback) {
+    var wordnet = require('WNdb');
+    wordnetToArrays(wordnet.path, console.log);
+}
 
-module.exports.parseDataFileFormat = parseDataFileFormat;
-module.exports.wordNetDataFileToArray = wordNetDataFileToArray;
+module.exports.wordnetToArrays = wordnetToArrays;
 module.exports.wordnetToSqliteDb = wordnetToSqliteDb;
