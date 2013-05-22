@@ -572,8 +572,8 @@ function wordNetIndexFileToArray (fileContents) {
  * @version 20130521
  * @param {String} wnDirectory The directory containing the wordnet database 
  *  files.
- * @param {Function} callback A callback function which will be given each 
- *  array as it is generated.
+ * @param {Function} callback A callback function which will be given the 
+ *  name of the file and each array as it is generated.
  */
 function wordnetToArrays (wnDirectory, callback) {
     var fs = require('fs');
@@ -597,10 +597,10 @@ function wordnetToArrays (wnDirectory, callback) {
                 throw err;
             }
             if (/data/.test(filename)) {
-                callback(wordNetDataFileToArray(contents));
+                callback(filename, wordNetDataFileToArray(contents));
             }
             if (/index/.test(filename)) {
-                callback(wordNetIndexFileToArray(contents));
+                callback(filename, wordNetIndexFileToArray(contents));
             }
         });
     });
@@ -616,7 +616,9 @@ function wordnetToArrays (wnDirectory, callback) {
  */
 function wordnetToSqliteDb (callback) {
     var wordnet = require('WNdb');
-    wordnetToArrays(wordnet.path, console.log);
+    wordnetToArrays(wordnet.path, function (filename, arr) {
+        console.log(filename + ' =', arr.entries[0]); 
+    });
 }
 
 module.exports.wordnetToArrays = wordnetToArrays;
