@@ -14,7 +14,9 @@
  * @requires fs
  * @requires WNdb
  * @requires sqlite3
- * @exports nothing yet
+ * @exports parseDataFileFormat
+ * @exports wordNetDataFileToArray
+ * @exports wordnetToSqliteDb
  */
 
 /**
@@ -63,6 +65,30 @@ var syntactic_markers = /(.*)\((..?)\)/;
  * @version 20130521
  */
 var source_target = /([0-9a-f]{2})([0-9a-f]{2})/;
+function wordNetFileToArray (fileContents, entryParser) {
+    'use strict';
+    var comments = /^ {2}.*$/gm;
+    function getLicense () {
+        var out = '';
+        try {
+            out = fileContents.match(comments).join('\n');
+        } catch (e) {
+            out = '';
+        }
+        return out;
+    }
+    var out = {
+        "license" : getLicense(),
+        "entries" : fileContents.replace(comments, '')
+            .replace(/(\r\n|\r|\n)+/g, '\n')
+            .trim()
+            .split('\n')
+            .map(function (entry) {
+                return entryParser(entry);
+            })
+    };
+    return out;
+}
 /**
  * Parses the `data.` file's individual records.
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
@@ -102,127 +128,127 @@ var source_target = /([0-9a-f]{2})([0-9a-f]{2})/;
  *   pointers: 
  *    [ { pointer_symbol: '*',
  *        synset_offset: '00005041',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '*',
  *        synset_offset: '00004227',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '+',
  *        synset_offset: '03110322',
- *        ss_type: 'a',
+ *        pos: 'a',
  *        source_target: '0301',
  *        source: '03',
  *        target: '01' },
  *      { pointer_symbol: '+',
  *        synset_offset: '00831191',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0303',
  *        source: '03',
  *        target: '03' },
  *      { pointer_symbol: '+',
  *        synset_offset: '04080833',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0301',
  *        source: '03',
  *        target: '01' },
  *      { pointer_symbol: '+',
  *        synset_offset: '04250850',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0105',
  *        source: '01',
  *        target: '05' },
  *      { pointer_symbol: '+',
  *        synset_offset: '00831191',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0101',
  *        source: '01',
  *        target: '01' },
  *      { pointer_symbol: '^',
  *        synset_offset: '00004227',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0103',
  *        source: '01',
  *        target: '03' },
  *      { pointer_symbol: '^',
  *        synset_offset: '00005041',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0103',
  *        source: '01',
  *        target: '03' },
  *      { pointer_symbol: '$',
  *        synset_offset: '00002325',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '$',
  *        synset_offset: '00002573',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00002573',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00002724',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00002942',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00003826',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00004032',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00004227',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00005041',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00006697',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00007328',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00017031',
- *        ss_type: 'v',
+ *        pos: 'v',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' } ],
@@ -245,31 +271,31 @@ var source_target = /([0-9a-f]{2})([0-9a-f]{2})/;
  *   pointers: 
  *    [ { pointer_symbol: '=',
  *        synset_offset: '05200169',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '=',
  *        synset_offset: '05616246',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '+',
  *        synset_offset: '05616246',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0101',
  *        source: '01',
  *        target: '01' },
  *      { pointer_symbol: '+',
  *        synset_offset: '05200169',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0101',
  *        source: '01',
  *        target: '01' },
  *      { pointer_symbol: '!',
  *        synset_offset: '00002098',
- *        ss_type: 'a',
+ *        pos: 'a',
  *        source_target: '0101',
  *        source: '01',
  *        target: '01' } ],
@@ -290,19 +316,19 @@ var source_target = /([0-9a-f]{2})([0-9a-f]{2})/;
  *   pointers: 
  *    [ { pointer_symbol: '~',
  *        synset_offset: '00001930',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '00002137',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' },
  *      { pointer_symbol: '~',
  *        synset_offset: '04424418',
- *        ss_type: 'n',
+ *        pos: 'n',
  *        source_target: '0000',
  *        source: '00',
  *        target: '00' } ],
@@ -346,7 +372,7 @@ function parseDataFileFormat (record) {
         drawer = {
             "pointer_symbol" : tmp.shift(),
             "synset_offset" : tmp.shift(),
-            "ss_type" : tmp.shift(),
+            "pos" : tmp.shift(),
             "source_target" : tmp.shift()
         };
         drawer.source = drawer.source_target.match(source_target)[1];
@@ -367,6 +393,87 @@ function parseDataFileFormat (record) {
             });
             numFrames -= 1;
         }
+    }
+    return out;
+}
+/**
+ * Parses the `index.` file's individual records.
+ * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
+ * @version 20130521
+ * @param {String} record A line of information from the `index.` file.
+ * @returns {Object} Returns an object containing properties whose values are 
+ *  determined by the parsed data.
+ * @example
+ * // This is example output
+ * 
+ * { lemma: '\'tween',
+ *   pos: 'r',
+ *   synset_cnt: '1',
+ *   p_cnt: '0',
+ *   pointers: [],
+ *   sense_cnt: '1',
+ *   tagsense_cnt: '0',
+ *   synset_offsets: [ '00250898' ] }
+ * 
+ * @example
+ * // This is example output
+ * 
+ * { lemma: 'aah',
+ *   pos: 'v',
+ *   synset_cnt: '1',
+ *   p_cnt: '1',
+ *   pointers: [ { ptr_symbol: '@' } ],
+ *   sense_cnt: '1',
+ *   tagsense_cnt: '0',
+ *   synset_offsets: [ '00865776' ] }
+ * 
+ * @example
+ * // This is example output
+ * 
+ * { lemma: '.22-caliber',
+ *   pos: 'a',
+ *   synset_cnt: '1',
+ *   p_cnt: '1',
+ *   pointers: [ { ptr_symbol: '\\' } ],
+ *   sense_cnt: '1',
+ *   tagsense_cnt: '0',
+ *   synset_offsets: [ '03146310' ] }
+ * 
+ * @example
+ * // This is example output
+ * 
+ * { lemma: '1000000000000',
+ *   pos: 'n',
+ *   synset_cnt: '2',
+ *   p_cnt: '2',
+ *   pointers: [ { ptr_symbol: '@' }, { ptr_symbol: ';' } ],
+ *   sense_cnt: '2',
+ *   tagsense_cnt: '0',
+ *   synset_offsets: [ '13752443', '13752172' ] }
+ */
+function parseIndexFileFormat (record) {
+    'use strict';
+    var out = {};
+    var tmp = record.trim().split(' ');
+    out.lemma = tmp.shift();
+    out.pos = tmp.shift();
+    out.synset_cnt = tmp.shift();
+    out.p_cnt = tmp.shift();
+    var numPtr = out.p_cnt;
+    out.pointers = [];
+    while (numPtr > 0) {
+        out.pointers.push({
+            "ptr_symbol" : tmp.shift()
+        });
+        numPtr -= 1;
+    }
+    out.sense_cnt = tmp.shift();
+    out.tagsense_cnt = tmp.shift();
+    out.synset_offsets = [];
+    var numSynsets = out.synset_cnt;
+    while(numSynsets > 0) {
+        out.synset_offsets.push(tmp.shift());
+        numSynsets -= 1;
     }
     return out;
 }
@@ -406,44 +513,84 @@ function parseDataFileFormat (record) {
  */
 function wordNetDataFileToArray (fileContents) {
     'use strict';
-    var comments = /^ {2}.*$/gm;
-    var out = {
-        "license" : fileContents.match(comments).join('\n'),
-        "entries" : fileContents.replace(comments, '')
-            .replace(/(\r\n|\r|\n)+/g, '\n')
-            .trim()
-            .split('\n')
-            .map(function (entry) {
-                return parseDataFileFormat(entry);
-            })
-    };
-    return out;
+    return wordNetFileToArray(fileContents, parseDataFileFormat);
+}
+/**
+ * Converts `index.` files into an array.
+ * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
+ * @version 20130521
+ * @param {String} fileContents The contents of the file to parse.
+ * @returns {Object} Returns an object with two properties: license and entries.
+ *  The license property contains the license header from the file. The entries
+ *  property contains the array of parsed information.
+ * @example
+ * var wordnet = require('WNdb');
+ * var path = require('path');
+ * var fs = require('fs');
+ * 
+ * wordnet.files.forEach(function (filename) {
+ *     'use strict';
+ *     var fname = path.resolve(wordnet.path, filename);
+ *     
+ *     fs.readFile(fname, 'utf8', function (err, contents) {
+ *         if (err) {
+ *             throw err;
+ *         }
+ *         if (/index/.test(filename)) {
+ *             console.log(
+ *                 // let's not get carried away here. we'll look at the first
+ *                 // entry parsed from each file.
+ *                 wordNetIndexFileToArray(contents).entries[0]
+ *             );
+ *         }
+ *     });
+ * });
+ * // see the example for `parseIndexFileFormat` and imagine those massive 
+ * // objects in an array... 
+ * @see parseIndexFileFormat
+ */
+function wordNetIndexFileToArray (fileContents) {
+    'use strict';
+    return wordNetFileToArray(fileContents, parseIndexFileFormat);
+}
+/**
+ * ############# converts `data.` files into an array but does not work on 
+ *  `index.` files yet.
+ */
+function wordnetToSqliteDb () {
+    var wordnet = require('WNdb');
+    var path = require('path');
+    var fs = require('fs');
+    var wordNetDatabaseFiles = [
+        "index.noun",
+        "data.noun",
+        "index.verb",
+        "data.verb",
+        "index.adj",
+        "data.adj",
+        "index.adv",
+        "data.adv"
+    ];
+    wordNetDatabaseFiles.forEach(function (filename) {
+        'use strict';
+        var fname = path.resolve(wordnet.path, filename);
+        
+        fs.readFile(fname, 'utf8', function (err, contents) {
+            if (err) {
+                throw err;
+            }
+            if (/data/.test(filename)) {
+                //console.log(wordNetDataFileToArray(contents).entries[0]);
+            }
+            if (/index/.test(filename)) {
+                console.log(
+                    wordNetIndexFileToArray(contents).entries[14]
+                );
+            }
+        });
+    });
 }
 
-
-
-
-// ############# converts `data.` files into an array but does not work on 
-// `index.` files yet.
-var wordnet = require('WNdb');
-var path = require('path');
-var fs = require('fs');
-
-wordnet.files.forEach(function (filename) {
-    'use strict';
-    var fname = path.resolve(wordnet.path, filename);
-    
-    fs.readFile(fname, 'utf8', function (err, contents) {
-        if (err) {
-            throw err;
-        }
-        if (/data/.test(filename)) {
-            console.log(
-                wordNetDataFileToArray(contents).entries[0]
-            );
-        }
-    });
-});
-
-
-
+module.exports.parseDataFileFormat = parseDataFileFormat;
+module.exports.wordNetDataFileToArray = wordNetDataFileToArray;
+module.exports.wordnetToSqliteDb = wordnetToSqliteDb;
