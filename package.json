@@ -1,7 +1,7 @@
 {
                     
     "name"          : "wordnet-to-sqlite",
-    "version"       : "0.0.1",
+    "version"       : "0.0.2",
     "main"          : "./src/wordnet-to-sqlite.js",
     "description"   : "A utility for parsing the wordnet files into an sqlite database using Node.js.",
     "keywords"      : ["wordnet", "nlp", "language", "linguistics", "atropa"],
