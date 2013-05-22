@@ -579,8 +579,8 @@
 <span class='line'>572</span>  * @version 20130521
 <span class='line'>573</span>  * @param {String} wnDirectory The directory containing the wordnet database 
 <span class='line'>574</span>  *  files.
-<span class='line'>575</span>  * @param {Function} callback A callback function which will be given each 
-<span class='line'>576</span>  *  array as it is generated.
+<span class='line'>575</span>  * @param {Function} callback A callback function which will be given the 
+<span class='line'>576</span>  *  name of the file and each array as it is generated.
 <span class='line'>577</span>  */</span><span class="WHIT">
 <span class='line'>578</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">wordnetToArrays</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">wnDirectory</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">callback</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>579</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">fs</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">require</span><span class="PUNC">(</span><span class="STRN">'fs'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
@@ -604,27 +604,31 @@
 <span class='line'>597</span> </span><span class="WHIT">                </span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="NAME">err</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>598</span> </span><span class="WHIT">            </span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>599</span> </span><span class="WHIT">            </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="REGX">/data/</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="NAME">filename</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>600</span> </span><span class="WHIT">                </span><span class="NAME">callback</span><span class="PUNC">(</span><span class="NAME">wordNetDataFileToArray</span><span class="PUNC">(</span><span class="NAME">contents</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>600</span> </span><span class="WHIT">                </span><span class="NAME">callback</span><span class="PUNC">(</span><span class="NAME">filename</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">wordNetDataFileToArray</span><span class="PUNC">(</span><span class="NAME">contents</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>601</span> </span><span class="WHIT">            </span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>602</span> </span><span class="WHIT">            </span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="REGX">/index/</span><span class="PUNC">.</span><span class="NAME">test</span><span class="PUNC">(</span><span class="NAME">filename</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>603</span> </span><span class="WHIT">                </span><span class="NAME">callback</span><span class="PUNC">(</span><span class="NAME">wordNetIndexFileToArray</span><span class="PUNC">(</span><span class="NAME">contents</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>603</span> </span><span class="WHIT">                </span><span class="NAME">callback</span><span class="PUNC">(</span><span class="NAME">filename</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">wordNetIndexFileToArray</span><span class="PUNC">(</span><span class="NAME">contents</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>604</span> </span><span class="WHIT">            </span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>605</span> </span><span class="WHIT">        </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>606</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
 <span class='line'>607</span> </span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>608</span> </span><span class="COMM">/**
-<span class='line'>609</span>  * Converts `data` and `index` files into an SQLite database.
-<span class='line'>610</span>  * @author &lt;a href="mailto:matthewkastor@gmail.com">Matthew Kastor&lt;/a>
-<span class='line'>611</span>  * @version 20130521
-<span class='line'>612</span>  * @param {String} wnDirectory The directory containing the wordnet database 
-<span class='line'>613</span>  *  files.
-<span class='line'>614</span>  * @param {Function} callback A callback function which will be given each 
-<span class='line'>615</span>  *  array as it is generated.
-<span class='line'>616</span>  */</span><span class="WHIT">
-<span class='line'>617</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">wordnetToSqliteDb</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">callback</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>618</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">wordnet</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">require</span><span class="PUNC">(</span><span class="STRN">'WNdb'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>619</span> </span><span class="WHIT">    </span><span class="NAME">wordnetToArrays</span><span class="PUNC">(</span><span class="NAME">wordnet.path</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">console.log</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>620</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'>621</span> 
-<span class='line'>622</span> </span><span class="NAME">module.exports.wordnetToArrays</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">wordnetToArrays</span><span class="PUNC">;</span><span class="WHIT">
-<span class='line'>623</span> </span><span class="NAME">module.exports.wordnetToSqliteDb</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">wordnetToSqliteDb</span><span class="PUNC">;</span></pre></body></html>
+<span class='line'>609</span>  * Will convert `data` and `index` files into an SQLite database at some future
+<span class='line'>610</span>  *  date. Right now all it does is log the first entry from each of the 
+<span class='line'>611</span>  *  generated arrays along with the parsed file's name.
+<span class='line'>612</span>  * @author &lt;a href="mailto:matthewkastor@gmail.com">Matthew Kastor&lt;/a>
+<span class='line'>613</span>  * @version 20130521
+<span class='line'>614</span>  * @param {String} wnDirectory The directory containing the wordnet database 
+<span class='line'>615</span>  *  files.
+<span class='line'>616</span>  * @param {Function} callback A callback function which will be given each 
+<span class='line'>617</span>  *  array as it is generated.
+<span class='line'>618</span>  */</span><span class="WHIT">
+<span class='line'>619</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">wordnetToSqliteDb</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">callback</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>620</span> </span><span class="WHIT">    </span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">wordnet</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">require</span><span class="PUNC">(</span><span class="STRN">'WNdb'</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>621</span> </span><span class="WHIT">    </span><span class="NAME">wordnetToArrays</span><span class="PUNC">(</span><span class="NAME">wordnet.path</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="NAME">filename</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">arr</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'>622</span> </span><span class="WHIT">        </span><span class="NAME">console.log</span><span class="PUNC">(</span><span class="NAME">filename</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="STRN">' ='</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">arr.entries</span><span class="PUNC">[</span><span class="NUMB">0</span><span class="PUNC">]</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT"> </span><span class="WHIT">
+<span class='line'>623</span> </span><span class="WHIT">    </span><span class="PUNC">}</span><span class="PUNC">)</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>624</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'>625</span> 
+<span class='line'>626</span> </span><span class="NAME">module.exports.wordnetToArrays</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">wordnetToArrays</span><span class="PUNC">;</span><span class="WHIT">
+<span class='line'>627</span> </span><span class="NAME">module.exports.wordnetToSqliteDb</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">wordnetToSqliteDb</span><span class="PUNC">;</span></pre></body></html>

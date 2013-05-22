@@ -84,12 +84,14 @@
             /// <summary>Converts `data` and `index` files into arrays.</summary>
             /// <param name="wnDirectory" type="String">The directory containing the wordnet database 
             ///  files.</param>
-            /// <param name="callback" type="Function">A callback function which will be given each 
-            ///  array as it is generated.</param>
+            /// <param name="callback" type="Function">A callback function which will be given the 
+            ///  name of the file and each array as it is generated.</param>
         }, 
         
         wordnetToSqliteDb: function(wnDirectory, callback) {
-            /// <summary>Converts `data` and `index` files into an SQLite database.</summary>
+            /// <summary>Will convert `data` and `index` files into an SQLite database at some future
+            ///  date. Right now all it does is log the first entry from each of the 
+            ///  generated arrays along with the parsed file&apos;s name.</summary>
             /// <param name="wnDirectory" type="String">The directory containing the wordnet database 
             ///  files.</param>
             /// <param name="callback" type="Function">A callback function which will be given each 

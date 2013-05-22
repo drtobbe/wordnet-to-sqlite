@@ -606,7 +606,9 @@ function wordnetToArrays (wnDirectory, callback) {
     });
 }
 /**
- * Converts `data` and `index` files into an SQLite database.
+ * Will convert `data` and `index` files into an SQLite database at some future
+ *  date. Right now all it does is log the first entry from each of the 
+ *  generated arrays along with the parsed file's name.
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
  * @param {String} wnDirectory The directory containing the wordnet database 
