@@ -574,6 +574,12 @@ function wordNetIndexFileToArray (fileContents) {
  *  files.
  * @param {Function} callback A callback function which will be given the 
  *  name of the file and each array as it is generated.
+ * @example
+ * var wnsql = require('wordnet-to-sqlite');
+ * var wordnet = require('WNdb');
+ * wnsql.wordnetToArrays(wordnet.path, function (filename, arr) {
+ *     console.log(filename + ' =', arr.entries[0]); 
+ * });
  */
 function wordnetToArrays (wnDirectory, callback) {
     var fs = require('fs');
@@ -611,6 +617,9 @@ function wordnetToArrays (wnDirectory, callback) {
  *  generated arrays along with the parsed file's name.
  * @author <a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>
  * @version 20130521
+ * @example
+ * var wnsql = require('wordnet-to-sqlite');
+ * wnsql.wordnetToSqliteDb();
  */
 function wordnetToSqliteDb () {
     var wordnet = require('WNdb');
