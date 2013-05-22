@@ -30,10 +30,10 @@
         /// <field name="source_target" type="">This regular expression separates the source and target identifiers.
         /// this pattern returns [&quot;0a3b&quot;, &quot;0a&quot;, &quot;3b&quot;]
         /// for &quot;0a3b&quot;.match(source_target);
-        /// 
+        ///  
         /// The following notes are from
         /// http://wordnet.princeton.edu/man/wninput.5WN.html
-        /// 
+        ///  
         /// The source/target field distinguishes lexical and semantic pointers. It 
         /// is a four byte field, containing two two-digit hexadecimal integers. The 
         /// first two digits indicates the word number in the current (source) 
@@ -43,19 +43,58 @@
         /// indicated by synset_offset.</field>
         /// <returns type="_global_"/>
                 
+        wordNetFileToArray: function(fileContents, entryParser) {
+            /// <summary>Separates the license from the given fileContents and feeds the remaining 
+            ///  lines into the given entry parser.</summary>
+            /// <param name="fileContents" type="String">The file contents to parse.</param>
+            /// <param name="entryParser" type="Function">The entry parser to use.</param>
+            /// <returns type="Object">Returns an object representing the parsed file.</returns>
+        }, 
+        
         parseDataFileFormat: function(record) {
-            /// <summary>Parses the `data.` file&apos;s individual records.</summary>
-            /// <param name="record" type="String">A line of information from the `data.` file.</param>
+            /// <summary>Parses the `data` file&apos;s individual records.</summary>
+            /// <param name="record" type="String">A line of information from the `data` file.</param>
+            /// <returns type="Object">Returns an object containing properties whose values are 
+            ///  determined by the parsed data.</returns>
+        }, 
+        
+        parseIndexFileFormat: function(record) {
+            /// <summary>Parses the `index` file&apos;s individual records.</summary>
+            /// <param name="record" type="String">A line of information from the `index` file.</param>
             /// <returns type="Object">Returns an object containing properties whose values are 
             ///  determined by the parsed data.</returns>
         }, 
         
         wordNetDataFileToArray: function(fileContents) {
-            /// <summary>Converts `data.` files into an array.</summary>
+            /// <summary>Converts `data` files into an array.</summary>
             /// <param name="fileContents" type="String">The contents of the file to parse.</param>
             /// <returns type="Object">Returns an object with two properties: license and entries.
             ///  The license property contains the license header from the file. The entries
             ///  property contains the array of parsed information.</returns>
+        }, 
+        
+        wordNetIndexFileToArray: function(fileContents) {
+            /// <summary>Converts `index` files into an array.</summary>
+            /// <param name="fileContents" type="String">The contents of the file to parse.</param>
+            /// <returns type="Object">Returns an object with two properties: license and entries.
+            ///  The license property contains the license header from the file. The entries
+            ///  property contains the array of parsed information.</returns>
+        }, 
+        
+        wordnetToArrays: function(wnDirectory, callback) {
+            /// <summary>Converts `data` and `index` files into arrays.</summary>
+            /// <param name="wnDirectory" type="String">The directory containing the wordnet database 
+            ///  files.</param>
+            /// <param name="callback" type="Function">A callback function which will be given each 
+            ///  array as it is generated.</param>
+        }, 
+        
+        wordnetToSqliteDb: function(wnDirectory, callback) {
+            /// <summary>Converts `data` and `index` files into an SQLite database.</summary>
+            /// <param name="wnDirectory" type="String">The directory containing the wordnet database 
+            ///  files.</param>
+            /// <param name="callback" type="Function">A callback function which will be given each 
+            ///  array as it is generated.</param>
         }
         
     };

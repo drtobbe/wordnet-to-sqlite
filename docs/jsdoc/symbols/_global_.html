@@ -231,7 +231,7 @@ ul.inheritsList
 					<tbody>
 					
 						<tr>
-							<td class="attributes">&nbsp;</td>
+							<td class="attributes">&lt;private&gt; &nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont">
 								<b><a href="../symbols/_global_.html#source_target">source_target</a></b>
@@ -241,7 +241,7 @@ ul.inheritsList
 						</tr>
 					
 						<tr>
-							<td class="attributes">&nbsp;</td>
+							<td class="attributes">&lt;private&gt; &nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont">
 								<b><a href="../symbols/_global_.html#syntactic_markers">syntactic_markers</a></b>
@@ -272,20 +272,65 @@ ul.inheritsList
 					<tbody>
 					
 						<tr>
-							<td class="attributes">&nbsp;</td>
+							<td class="attributes">&lt;private&gt; &nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#parseDataFileFormat">parseDataFileFormat</a></b>(record)
 								</div>
-								<div class="description">Parses the `data.</div>
+								<div class="description">Parses the `data` file's individual records.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;private&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#parseIndexFileFormat">parseIndexFileFormat</a></b>(record)
+								</div>
+								<div class="description">Parses the `index` file's individual records.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;private&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#wordNetDataFileToArray">wordNetDataFileToArray</a></b>(fileContents)
+								</div>
+								<div class="description">Converts `data` files into an array.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;private&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#wordNetFileToArray">wordNetFileToArray</a></b>(fileContents, entryParser)
+								</div>
+								<div class="description">Separates the license from the given fileContents and feeds the remaining  lines into the given entry parser.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&lt;private&gt; &nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#wordNetIndexFileToArray">wordNetIndexFileToArray</a></b>(fileContents)
+								</div>
+								<div class="description">Converts `index` files into an array.</div>
 							</td>
 						</tr>
 					
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#wordNetDataFileToArray">wordNetDataFileToArray</a></b>(fileContents)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#wordnetToArrays">wordnetToArrays</a></b>(wnDirectory, callback)
 								</div>
-								<div class="description">Converts `data.</div>
+								<div class="description">Converts `data` and `index` files into arrays.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#wordnetToSqliteDb">wordnetToSqliteDb</a></b>(wnDirectory, callback)
+								</div>
+								<div class="description">Converts `data` and `index` files into an SQLite database.</div>
 							</td>
 						</tr>
 					
@@ -308,14 +353,14 @@ ul.inheritsList
 				</div>
 				
 					<a name="source_target"> </a>
-					<div class="fixedFont">
+					<div class="fixedFont">&lt;private&gt; 
 					
 					
 					<b>source_target</b>
 					
 					</div>
 					<div class="description">
-						This regular expression separates the source and target identifiers.this pattern returns ["0a3b", "0a", "3b"]for "0a3b".match(source_target);The following notes are fromhttp://wordnet.princeton.edu/man/wninput.5WN.htmlThe source/target field distinguishes lexical and semantic pointers. It is a four byte field, containing two two-digit hexadecimal integers. The first two digits indicates the word number in the current (source) synset, the last two digits indicate the word number in the target synset. A value of 0000 means that pointer_symbol represents a semantic relation between the current (source) synset and the target synset indicated by synset_offset.
+						This regular expression separates the source and target identifiers.this pattern returns ["0a3b", "0a", "3b"]for "0a3b".match(source_target); The following notes are fromhttp://wordnet.princeton.edu/man/wninput.5WN.html The source/target field distinguishes lexical and semantic pointers. It is a four byte field, containing two two-digit hexadecimal integers. The first two digits indicates the word number in the current (source) synset, the last two digits indicate the word number in the target synset. A value of 0000 means that pointer_symbol represents a semantic relation between the current (source) synset and the target synset indicated by synset_offset.
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/C__Users_kastor_Documents_GitHub_wordnet-to-sqlite_src_wordnet-to-sqlite.js.html">wordnet-to-sqlite.js</a>.
@@ -333,7 +378,7 @@ ul.inheritsList
 					<hr />
 				
 					<a name="syntactic_markers"> </a>
-					<div class="fixedFont">
+					<div class="fixedFont">&lt;private&gt; 
 					
 					
 					<b>syntactic_markers</b>
@@ -366,14 +411,14 @@ ul.inheritsList
 				</div>
 				
 					<a name="parseDataFileFormat"> </a>
-					<div class="fixedFont">
+					<div class="fixedFont">&lt;private&gt; 
 					
 					<span class="light">{Object}</span>
 					<b>parseDataFileFormat</b>(record)
 					
 					</div>
 					<div class="description">
-						Parses the `data.` file's individual records.
+						Parses the `data` file's individual records.
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/C__Users_kastor_Documents_GitHub_wordnet-to-sqlite_src_wordnet-to-sqlite.js.html">wordnet-to-sqlite.js</a>.
@@ -385,11 +430,11 @@ ul.inheritsList
 					
 					<pre class="code">// This is example output{ gloss: 'without musical accompaniment; "they performed a cappella"',  synset_offset: '00001740',  lex_filenum: '02',  ss_type: 'r',  w_cnt: '01',  words: [ { word: 'a_cappella', syntactic_markers: '', lex_id: '0' } ],  p_cnt: '000',  pointers: [],  f_cnt: 0,  frames: [] }</pre>
 					
-					<pre class="code">// This is example output{ gloss: 'draw air into, and expel out of, the lungs; "I can breathe  better when the air is clean"; "The patient is respiring"',  synset_offset: '00001740',  lex_filenum: '29',  ss_type: 'v',  w_cnt: '04',  words:    [ { word: 'breathe', syntactic_markers: '', lex_id: '0' },     { word: 'take_a_breath', syntactic_markers: '', lex_id: '0' },     { word: 'respire', syntactic_markers: '', lex_id: '0' },     { word: 'suspire', syntactic_markers: '', lex_id: '3' } ],  p_cnt: '021',  pointers:    [ { pointer_symbol: '*',       synset_offset: '00005041',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '*',       synset_offset: '00004227',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '+',       synset_offset: '03110322',       ss_type: 'a',       source_target: '0301',       source: '03',       target: '01' },     { pointer_symbol: '+',       synset_offset: '00831191',       ss_type: 'n',       source_target: '0303',       source: '03',       target: '03' },     { pointer_symbol: '+',       synset_offset: '04080833',       ss_type: 'n',       source_target: '0301',       source: '03',       target: '01' },     { pointer_symbol: '+',       synset_offset: '04250850',       ss_type: 'n',       source_target: '0105',       source: '01',       target: '05' },     { pointer_symbol: '+',       synset_offset: '00831191',       ss_type: 'n',       source_target: '0101',       source: '01',       target: '01' },     { pointer_symbol: '^',       synset_offset: '00004227',       ss_type: 'v',       source_target: '0103',       source: '01',       target: '03' },     { pointer_symbol: '^',       synset_offset: '00005041',       ss_type: 'v',       source_target: '0103',       source: '01',       target: '03' },     { pointer_symbol: '$',       synset_offset: '00002325',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '$',       synset_offset: '00002573',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00002573',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00002724',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00002942',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00003826',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00004032',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00004227',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00005041',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00006697',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00007328',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00017031',       ss_type: 'v',       source_target: '0000',       source: '00',       target: '00' } ],  f_cnt: '02',  frames: [ { f_num: '02', w_num: '00' }, { f_num: '08', w_num: '00' } ] }</pre>
+					<pre class="code">// This is example output{ gloss: 'draw air into, and expel out of, the lungs; "I can breathe  better when the air is clean"; "The patient is respiring"',  synset_offset: '00001740',  lex_filenum: '29',  ss_type: 'v',  w_cnt: '04',  words:    [ { word: 'breathe', syntactic_markers: '', lex_id: '0' },     { word: 'take_a_breath', syntactic_markers: '', lex_id: '0' },     { word: 'respire', syntactic_markers: '', lex_id: '0' },     { word: 'suspire', syntactic_markers: '', lex_id: '3' } ],  p_cnt: '021',  pointers:    [ { pointer_symbol: '*',       synset_offset: '00005041',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '*',       synset_offset: '00004227',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '+',       synset_offset: '03110322',       pos: 'a',       source_target: '0301',       source: '03',       target: '01' },     { pointer_symbol: '+',       synset_offset: '00831191',       pos: 'n',       source_target: '0303',       source: '03',       target: '03' },     { pointer_symbol: '+',       synset_offset: '04080833',       pos: 'n',       source_target: '0301',       source: '03',       target: '01' },     { pointer_symbol: '+',       synset_offset: '04250850',       pos: 'n',       source_target: '0105',       source: '01',       target: '05' },     { pointer_symbol: '+',       synset_offset: '00831191',       pos: 'n',       source_target: '0101',       source: '01',       target: '01' },     { pointer_symbol: '^',       synset_offset: '00004227',       pos: 'v',       source_target: '0103',       source: '01',       target: '03' },     { pointer_symbol: '^',       synset_offset: '00005041',       pos: 'v',       source_target: '0103',       source: '01',       target: '03' },     { pointer_symbol: '$',       synset_offset: '00002325',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '$',       synset_offset: '00002573',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00002573',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00002724',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00002942',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00003826',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00004032',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00004227',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00005041',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00006697',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00007328',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00017031',       pos: 'v',       source_target: '0000',       source: '00',       target: '00' } ],  f_cnt: '02',  frames: [ { f_num: '02', w_num: '00' }, { f_num: '08', w_num: '00' } ] }</pre>
 					
-					<pre class="code">// This is example output{ gloss: '(usually followed by `to\') having the necessary means or  skill or know-how or authority to do something; "able to swim";  "she was able to program her computer"; "we were at last able to  buy a car"; "able to get a grant for the project"',  synset_offset: '00001740',  lex_filenum: '00',  ss_type: 'a',  w_cnt: '01',  words: [ { word: 'able', syntactic_markers: '', lex_id: '0' } ],  p_cnt: '005',  pointers:    [ { pointer_symbol: '=',       synset_offset: '05200169',       ss_type: 'n',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '=',       synset_offset: '05616246',       ss_type: 'n',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '+',       synset_offset: '05616246',       ss_type: 'n',       source_target: '0101',       source: '01',       target: '01' },     { pointer_symbol: '+',       synset_offset: '05200169',       ss_type: 'n',       source_target: '0101',       source: '01',       target: '01' },     { pointer_symbol: '!',       synset_offset: '00002098',       ss_type: 'a',       source_target: '0101',       source: '01',       target: '01' } ],  f_cnt: 0,  frames: [] }</pre>
+					<pre class="code">// This is example output{ gloss: '(usually followed by `to\') having the necessary means or  skill or know-how or authority to do something; "able to swim";  "she was able to program her computer"; "we were at last able to  buy a car"; "able to get a grant for the project"',  synset_offset: '00001740',  lex_filenum: '00',  ss_type: 'a',  w_cnt: '01',  words: [ { word: 'able', syntactic_markers: '', lex_id: '0' } ],  p_cnt: '005',  pointers:    [ { pointer_symbol: '=',       synset_offset: '05200169',       pos: 'n',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '=',       synset_offset: '05616246',       pos: 'n',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '+',       synset_offset: '05616246',       pos: 'n',       source_target: '0101',       source: '01',       target: '01' },     { pointer_symbol: '+',       synset_offset: '05200169',       pos: 'n',       source_target: '0101',       source: '01',       target: '01' },     { pointer_symbol: '!',       synset_offset: '00002098',       pos: 'a',       source_target: '0101',       source: '01',       target: '01' } ],  f_cnt: 0,  frames: [] }</pre>
 					
-					<pre class="code">// This is example output{ gloss: 'that which is perceived or known or inferred to have its  own distinct existence (living or nonliving)',  synset_offset: '00001740',  lex_filenum: '03',  ss_type: 'n',  w_cnt: '01',  words: [ { word: 'entity', syntactic_markers: '', lex_id: '0' } ],  p_cnt: '003',  pointers:    [ { pointer_symbol: '~',       synset_offset: '00001930',       ss_type: 'n',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00002137',       ss_type: 'n',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '04424418',       ss_type: 'n',       source_target: '0000',       source: '00',       target: '00' } ],  f_cnt: 0,  frames: [] }</pre>
+					<pre class="code">// This is example output{ gloss: 'that which is perceived or known or inferred to have its  own distinct existence (living or nonliving)',  synset_offset: '00001740',  lex_filenum: '03',  ss_type: 'n',  w_cnt: '01',  words: [ { word: 'entity', syntactic_markers: '', lex_id: '0' } ],  p_cnt: '003',  pointers:    [ { pointer_symbol: '~',       synset_offset: '00001930',       pos: 'n',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '00002137',       pos: 'n',       source_target: '0000',       source: '00',       target: '00' },     { pointer_symbol: '~',       synset_offset: '04424418',       pos: 'n',       source_target: '0000',       source: '00',       target: '00' } ],  f_cnt: 0,  frames: [] }</pre>
 					
 					
 					
@@ -401,7 +446,63 @@ ul.inheritsList
 									<span class="light fixedFont">{String}</span> <b>record</b>
 									
 								</dt>
-								<dd>A line of information from the `data.` file.</dd>
+								<dd>A line of information from the `data` file.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Object}</span> Returns an object containing properties whose values are  determined by the parsed data.</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="parseIndexFileFormat"> </a>
+					<div class="fixedFont">&lt;private&gt; 
+					
+					<span class="light">{Object}</span>
+					<b>parseIndexFileFormat</b>(record)
+					
+					</div>
+					<div class="description">
+						Parses the `index` file's individual records.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/C__Users_kastor_Documents_GitHub_wordnet-to-sqlite_src_wordnet-to-sqlite.js.html">wordnet-to-sqlite.js</a>.
+						
+						<br /><i>Author: </i><a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>.
+					</div>
+					
+					
+					
+					<pre class="code">// This is example output{ lemma: '\'tween',  pos: 'r',  synset_cnt: '1',  p_cnt: '0',  pointers: [],  sense_cnt: '1',  tagsense_cnt: '0',  synset_offsets: [ '00250898' ] }</pre>
+					
+					<pre class="code">// This is example output{ lemma: 'aah',  pos: 'v',  synset_cnt: '1',  p_cnt: '1',  pointers: [ { ptr_symbol: '@' } ],  sense_cnt: '1',  tagsense_cnt: '0',  synset_offsets: [ '00865776' ] }</pre>
+					
+					<pre class="code">// This is example output{ lemma: '.22-caliber',  pos: 'a',  synset_cnt: '1',  p_cnt: '1',  pointers: [ { ptr_symbol: '\\' } ],  sense_cnt: '1',  tagsense_cnt: '0',  synset_offsets: [ '03146310' ] }</pre>
+					
+					<pre class="code">// This is example output{ lemma: '1000000000000',  pos: 'n',  synset_cnt: '2',  p_cnt: '2',  pointers: [ { ptr_symbol: '@' }, { ptr_symbol: ';' } ],  sense_cnt: '2',  tagsense_cnt: '0',  synset_offsets: [ '13752443', '13752172' ] }</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>record</b>
+									
+								</dt>
+								<dd>A line of information from the `index` file.</dd>
 							
 							</dl>
 						
@@ -422,14 +523,14 @@ ul.inheritsList
 					<hr />
 				
 					<a name="wordNetDataFileToArray"> </a>
-					<div class="fixedFont">
+					<div class="fixedFont">&lt;private&gt; 
 					
 					<span class="light">{Object}</span>
 					<b>wordNetDataFileToArray</b>(fileContents)
 					
 					</div>
 					<div class="description">
-						Converts `data.` files into an array.
+						Converts `data` files into an array.
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/C__Users_kastor_Documents_GitHub_wordnet-to-sqlite_src_wordnet-to-sqlite.js.html">wordnet-to-sqlite.js</a>.
@@ -476,6 +577,205 @@ ul.inheritsList
 							</dl>
 						
 
+					<hr />
+				
+					<a name="wordNetFileToArray"> </a>
+					<div class="fixedFont">&lt;private&gt; 
+					
+					<span class="light">{Object}</span>
+					<b>wordNetFileToArray</b>(fileContents, entryParser)
+					
+					</div>
+					<div class="description">
+						Separates the license from the given fileContents and feeds the remaining  lines into the given entry parser.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/C__Users_kastor_Documents_GitHub_wordnet-to-sqlite_src_wordnet-to-sqlite.js.html">wordnet-to-sqlite.js</a>.
+						
+						<br /><i>Author: </i><a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>.
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>fileContents</b>
+									
+								</dt>
+								<dd>The file contents to parse.</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Function}</span> <b>entryParser</b>
+									
+								</dt>
+								<dd>The entry parser to use.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Object}</span> Returns an object representing the parsed file.</dd>
+							
+							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="wordNetIndexFileToArray"> </a>
+					<div class="fixedFont">&lt;private&gt; 
+					
+					<span class="light">{Object}</span>
+					<b>wordNetIndexFileToArray</b>(fileContents)
+					
+					</div>
+					<div class="description">
+						Converts `index` files into an array.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/C__Users_kastor_Documents_GitHub_wordnet-to-sqlite_src_wordnet-to-sqlite.js.html">wordnet-to-sqlite.js</a>.
+						
+						<br /><i>Author: </i><a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>.
+					</div>
+					
+					
+					
+					<pre class="code">var wordnet = require('WNdb');var path = require('path');var fs = require('fs');wordnet.files.forEach(function (filename) {    'use strict';    var fname = path.resolve(wordnet.path, filename);        fs.readFile(fname, 'utf8', function (err, contents) {        if (err) {            throw err;        }        if (/index/.test(filename)) {            console.log(                // let's not get carried away here. we'll look at the first                // entry parsed from each file.                wordNetIndexFileToArray(contents).entries[0]            );        }    });});// see the example for `parseIndexFileFormat` and imagine those massive // objects in an array...</pre>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>fileContents</b>
+									
+								</dt>
+								<dd>The contents of the file to parse.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">Returns:</dt>
+							
+								<dd><span class="light fixedFont">{Object}</span> Returns an object with two properties: license and entries. The license property contains the license header from the file. The entries property contains the array of parsed information.</dd>
+							
+							</dl>
+						
+						
+						
+							<dl class="detailList">
+							<dt class="heading">See:</dt>
+							
+								<dd><a href="../symbols/_global_.html#parseIndexFileFormat">parseIndexFileFormat</a></dd>
+							
+							</dl>
+						
+
+					<hr />
+				
+					<a name="wordnetToArrays"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>wordnetToArrays</b>(wnDirectory, callback)
+					
+					</div>
+					<div class="description">
+						Converts `data` and `index` files into arrays.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/C__Users_kastor_Documents_GitHub_wordnet-to-sqlite_src_wordnet-to-sqlite.js.html">wordnet-to-sqlite.js</a>.
+						
+						<br /><i>Author: </i><a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>.
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>wnDirectory</b>
+									
+								</dt>
+								<dd>The directory containing the wordnet database  files.</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Function}</span> <b>callback</b>
+									
+								</dt>
+								<dd>A callback function which will be given each  array as it is generated.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="wordnetToSqliteDb"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>wordnetToSqliteDb</b>(wnDirectory, callback)
+					
+					</div>
+					<div class="description">
+						Converts `data` and `index` files into an SQLite database.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/C__Users_kastor_Documents_GitHub_wordnet-to-sqlite_src_wordnet-to-sqlite.js.html">wordnet-to-sqlite.js</a>.
+						
+						<br /><i>Author: </i><a href="mailto:matthewkastor@gmail.com">Matthew Kastor</a>.
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<span class="light fixedFont">{String}</span> <b>wnDirectory</b>
+									
+								</dt>
+								<dd>The directory containing the wordnet database  files.</dd>
+							
+								<dt>
+									<span class="light fixedFont">{Function}</span> <b>callback</b>
+									
+								</dt>
+								<dd>A callback function which will be given each  array as it is generated.</dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
 					
 				
 			
@@ -490,7 +790,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Tue May 21 2013 01:47:58 GMT-0400 (EDT)
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blank">JsDoc Toolkit</a> 2.4.0 on Tue May 21 2013 23:46:30 GMT-0400 (EDT)
 		</div>
 	</body>
 </html>
